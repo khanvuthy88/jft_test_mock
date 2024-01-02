@@ -23,6 +23,7 @@ Long description of module's purpose
     'assets': {
         'survey.survey_assets': [
             'jft_mock_test/static/src/scss/style.scss',
+            'jft_mock_test/static/src/js/survey_form.js'
         ]
     },
 

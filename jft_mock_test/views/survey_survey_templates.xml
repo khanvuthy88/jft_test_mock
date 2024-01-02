@@ -2,6 +2,33 @@
 <odoo>
     <data>
 
+        <template id="jft_survey_fill_form_in_progress" inherit_id="survey.survey_fill_form_in_progress">
+            <xpath expr="//t[@t-else='']/div[hasclass('row')]" position="before">
+                <div class="row">
+                    <div class="col-12">
+                        <nav aria-label="...">
+                            <ul class="pagination">
+                                <li t-foreach="jft_section.get(jft_section_title)" t-as="jft" t-attf-class="page-item #{'active' if jft.get('id') == question.id else ''}" aria-current="page">
+                                    <span class="page-link" t-esc="jft_index + 1"/>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+        <template id="jft_survey_section_title" name="JFT Section subtitle">
+            <section id="jft_sub_title">
+                   <div class="container-fluid">
+                       <div class="row">
+                           <div class="col-12 py-3">
+                               <p class="jft_sub_header mb-0">Section: <span t-esc="jft_section_title"/></p>
+                           </div>
+                       </div>
+                   </div>
+               </section>
+        </template>
+
        <template id="jft_survey_page_fill" inherit_id="survey.survey_page_fill">
            <xpath expr="//div[hasclass('o_survey_wrap')]" position="replace">
                <div class="o_survey_form">
@@ -10,15 +37,7 @@
                            <t t-call="survey.survey_fill_header" />
                        </div>
                    </section>
-                   <section id="jft_sub_title">
-                       <div class="container-fluid">
-                           <div class="row">
-                               <div class="col-12 py-3">
-                                   <p class="jft_sub_header mb-0">Section: title</p>
-                               </div>
-                           </div>
-                       </div>
-                   </section>
+                   <t t-call="jft_mock_test.jft_survey_section_title"/>
                    <section id="jft_survey_body" class="d-flex flex-row">
                        <div class="jft_survey_aside">
                             <ul class="jft_section_list">
