@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+
+       <template id="jft_survey_page_fill" inherit_id="survey.survey_page_fill">
+           <xpath expr="//div[hasclass('o_survey_wrap')]" position="replace">
+               <div class="o_survey_form">
+                   <section id="jft_survey_header" class="jft_survey_header">
+                       <div class="container-fluid d-flex flex-column">
+                           <t t-call="survey.survey_fill_header" />
+                       </div>
+                   </section>
+                   <section id="jft_sub_title">
+                       <div class="container-fluid">
+                           <div class="row">
+                               <div class="col-12 py-3">
+                                   <p class="jft_sub_header mb-0">Section: title</p>
+                               </div>
+                           </div>
+                       </div>
+                   </section>
+                   <section id="jft_survey_body" class="d-flex flex-row">
+                       <div class="jft_survey_aside">
+                            <ul class="jft_section_list">
+                                <li t-attf-class="#{'active' if b_page_index == 1 else ''}" t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});" t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
+                            </ul>
+                       </div>
+                       <div class="jft_survey_form">
+                           <t t-call="survey.survey_fill_form" />
+                       </div>
+                   </section>
+                   <section id="jft_survey_footer">
+                        <p>Footer</p>
+                   </section>
+               </div>
+
+           </xpath>
+       </template>
+        <template id="jft_survey_fill_form_start" inherit_id="survey.survey_fill_form_start">
+            <xpath expr="//div[hasclass('o_survey_start')]" position="replace">
+                <div class="wrap o_survey_start jft_survey_start">
+                    <div class="container">
+                        <div class="row g-3 align-items-center py-3">
+                            <div class="col-auto">
+                                <label for="intro_number" class="col-form-label jft_label">
+                                    <span class="d-block">数に入れる</span>
+                                    <span class="d-block">No.</span>
+                                </label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="text" id="intro_number" class="form-control" aria-describedby="Intro Number"/>
+                            </div>
+                        </div>
+                        <div class="row g-3 align-items-top py-3">
+                            <div class="col-auto">
+                                <label for="intro_name" class="col-form-label jft_label">
+                                    <span class="d-block">数に入れる</span>
+                                    <span class="d-block">Name</span>
+                                </label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="text" id="intro_given_name" class="form-control" aria-describedby="Given Name"/>
+                                <span class="text-center d-block">Given Name</span>
+                            </div>
+                            <div class="col-auto">
+                                <input type="text" id="intro_last_name" class="form-control mx-4" aria-describedby="Last Name"/>
+                                <span class="text-center d-block mx-4">Last Name</span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 align-items-center py-3">
+                            <div class="col-auto">
+                                <label for="intro_date_of_birth" class="col-form-label jft_label">
+                                    <span class="d-block">数に入れる</span>
+                                    <span class="d-block">Date Of birth</span>
+                                </label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="date" id="intro_date_of_birth" class="form-control" aria-describedby="Intro Number"/>
+                            </div>
+                        </div>
+                        <div class="row g-3 align-items-center py-3">
+                            <div class="col-auto">
+                                <label for="intro_nationality" class="col-form-label jft_label">
+                                    <span class="d-block">数に入れる</span>
+                                    <span class="d-block">Nationality</span>
+                                </label>
+                            </div>
+                            <div class="col-auto">
+                                <input type="text" id="intro_nationality" class="form-control" aria-describedby="Nationality"/>
+                            </div>
+                        </div>
+                        <div class="row g-3 align-items-center py-3">
+                            <div class="col-auto">
+                                <label for="intro_gender" class="col-form-label jft_label">
+                                    <span class="d-block">数に入れる</span>
+                                    <span class="d-block">Gender</span>
+                                </label>
+                            </div>
+                            <div class="col-auto">
+                                <select name="intro_gender" class="form-select" aria-label="Gender">
+                                    <option value="1">Male</option>
+                                    <option value="2">Femal</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12 text-end">
+                                <button type="submit" value="start" class="btn jft_btn_finished btn-primary btn-lg disabled">
+                                    <t t-if="survey.certification">
+                                        Start Certification
+                                    </t>
+                                    <t t-else="">
+                                        Start Survey
+                                    </t>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+        <template id="jft_survey_fill_header" inherit_id="survey.survey_fill_header">
+            <xpath expr="//div[hasclass('o_survey_nav')]" position="replace">
+                <div class="o_survey_nav">
+                    <div class="container-fluid m-0 p-0">
+                        <div class="row align-items-center py-3">
+                            <div  class="col-4 px-3">
+                                <h1 t-if="answer.state == 'new' or survey.questions_layout != 'page_per_question'"
+                                    t-esc="survey.title" class="o_survey_main_title mb-0"/>
+                            </div>
+                            <div class="o_survey_timer col-4">
+                                <p class="mb-0 text-end" t-if="answer.state == 'new'">Section Time Remaining</p>
+                                <h1 class="o_survey_timer_container timer text-end"/>
+                            </div>
+                            <div class="col-4">
+                                <div class="survey_main text-end">
+                                    <p class="mb-0">Date: <span t-esc="datetime.datetime.now().strftime('%d-%b-%Y')"/>  </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div t-att-class="'o_survey_breadcrumb_container mt8' + (' d-none ' if answer.state != 'in_progress' else '')"
+                         t-if="not survey.has_conditional_questions and survey.questions_layout == 'page_per_section' and answer.state != 'done'"
+                        t-att-data-can-go-back="survey.users_can_go_back"
+                        t-att-data-pages="json.dumps(breadcrumb_pages)" />
+                </div>
+            </xpath>
+        </template>
+    </data>
+</odoo>
