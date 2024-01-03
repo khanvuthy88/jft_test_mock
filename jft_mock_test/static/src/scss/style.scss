@@ -7,7 +7,24 @@ $intro_input: #efefef;
     background-color: $intro_label;
     color: #000;
 }
-
+.o_survey_page_per_question{
+    button{
+        &.btn-primary{
+            border-color: $secondary-color;
+            background-color: $secondary-color;
+        }
+    }
+}
+.o_survey_form_content{
+    .page-item{
+        &.active{
+            .page-link{
+                background-color: $secondary-color;
+                border-color: $secondary-color;
+            }
+        }
+    }
+}
 .o_survey_form{
     .jft_survey_header{
         background-color: $primary-color;
@@ -17,15 +34,15 @@ $intro_input: #efefef;
         color: #fff;
     }
     .jft_survey_aside{
-        height: 100vh;
         width: 3rem;
         background-color: #f2f2f2;
+        height: calc(100vh - 240px);
         ul{
             &.jft_section_list{
                 list-style: none;
                 margin: 0;
                 padding: 0;
-                height: 100vh;
+                height: 100%;
                 li{
                     text-wrap: nowrap;
                     text-overflow: ellipsis;

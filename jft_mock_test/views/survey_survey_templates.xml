@@ -5,9 +5,9 @@
         <template id="jft_survey_fill_form_in_progress" inherit_id="survey.survey_fill_form_in_progress">
             <xpath expr="//t[@t-else='']/div[hasclass('row')]" position="before">
                 <div class="row">
-                    <div class="col-12">
-                        <nav aria-label="...">
-                            <ul class="pagination">
+                    <div class="col-12 text-center">
+                        <nav aria-label="Question Pagination">
+                            <ul class="pagination justify-content-center">
                                 <li t-foreach="jft_section.get(jft_section_title)" t-as="jft" t-attf-class="page-item #{'active' if jft.get('id') == question.id else ''}" aria-current="page">
                                     <span class="page-link" t-esc="jft_index + 1"/>
                                 </li>
@@ -41,10 +41,10 @@
                    <section id="jft_survey_body" class="d-flex flex-row">
                        <div class="jft_survey_aside">
                             <ul class="jft_section_list">
-                                <li t-attf-class="#{'active' if b_page_index == 1 else ''}" t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});" t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
+                                <li t-attf-class="#{'active' if b_page_index in active_section else ''}" t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});" t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
                             </ul>
                        </div>
-                       <div class="jft_survey_form">
+                       <div class="jft_survey_form container">
                            <t t-call="survey.survey_fill_form" />
                        </div>
                    </section>

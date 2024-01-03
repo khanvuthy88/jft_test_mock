@@ -17,10 +17,14 @@ class JFTSurvey(Survey):
         res = super()._prepare_survey_data(survey_sudo, answer_sudo, **post)
         jft_section_question = {}
         section_title = ''
+        actived_section = []
         if 'question' in res:
             section_title = res['question'].title
+            actived_section.append(res['question'] and res['question'].is_page and res['question'].title)
         for section in survey_sudo.page_ids:
             jft_section_name = section.title
+            if jft_section_name not in actived_section:
+                actived_section.append(jft_section_name.title)
             if section.title not in jft_section_question:
                 jft_section_question[jft_section_name] = []
             for question in section.question_ids:
@@ -34,6 +38,7 @@ class JFTSurvey(Survey):
                     section_title = section.title
         res['jft_section'] = jft_section_question
         res['jft_section_title'] = section_title
+        res['active_section'] = actived_section
 
         return res
 
