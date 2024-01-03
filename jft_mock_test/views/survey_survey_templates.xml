@@ -28,6 +28,14 @@
                    </div>
                </section>
         </template>
+        <template id="jft_survey_aside" name="JFT survey aside">
+            <div class="jft_survey_aside">
+                <ul class="jft_section_list">
+                    <li t-att-data-section-id="active_session_id" t-attf-class="#{'active' if b_page.get('id') &lt; active_session_id else ''}" t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});" t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
+                </ul>
+           </div>
+
+        </template>
 
        <template id="jft_survey_page_fill" inherit_id="survey.survey_page_fill">
            <xpath expr="//div[hasclass('o_survey_wrap')]" position="replace">
@@ -39,17 +47,13 @@
                    </section>
                    <t t-call="jft_mock_test.jft_survey_section_title"/>
                    <section id="jft_survey_body" class="d-flex flex-row">
-                       <div class="jft_survey_aside">
-                            <ul class="jft_section_list">
-                                <li t-attf-class="#{'active' if b_page_index in active_section else ''}" t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});" t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
-                            </ul>
-                       </div>
+                        <t t-call="jft_mock_test.jft_survey_aside"/>
                        <div class="jft_survey_form container">
                            <t t-call="survey.survey_fill_form" />
                        </div>
                    </section>
                    <section id="jft_survey_footer">
-                        <p>Footer</p>
+                        <p class="mb-0">Footer</p>
                    </section>
                </div>
 
