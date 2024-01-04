@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
-
         <template id="jft_survey_fill_form_in_progress" inherit_id="survey.survey_fill_form_in_progress">
             <xpath expr="//t[@t-else='']/div[hasclass('row')]" position="before">
                 <div class="row">
                     <div class="col-12 text-center">
                         <nav aria-label="Question Pagination">
                             <ul class="pagination justify-content-center">
-                                <li t-foreach="jft_section.get(jft_section_title)" t-as="jft" t-attf-class="page-item #{'active' if jft.get('id') == question.id else ''}" aria-current="page">
+                                <li t-foreach="jft_section.get(jft_section_title)" t-as="jft"
+                                    t-attf-class="page-item #{'active' if jft.get('id') == question.id else ''}"
+                                    aria-current="page">
                                     <span class="page-link" t-esc="jft_index + 1"/>
                                 </li>
                             </ul>
@@ -21,8 +22,8 @@
             <section id="jft_sub_title">
                    <div class="container-fluid">
                        <div class="row">
-                           <div class="col-12 py-3">
-                               <p class="jft_sub_header mb-0">Section: <span t-esc="jft_section_title"/></p>
+                           <div class="col-12 py-2">
+                               <p class="jft_sub_header mb-0">Test: <span t-esc="survey.title"/></p>
                            </div>
                        </div>
                    </div>
@@ -31,10 +32,33 @@
         <template id="jft_survey_aside" name="JFT survey aside">
             <div class="jft_survey_aside">
                 <ul class="jft_section_list">
-                    <li t-att-data-section-id="active_session_id" t-attf-class="#{'active' if b_page.get('id') &lt; active_session_id else ''}" t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});" t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
+                    <li t-att-data-section-id="active_session_id"
+                        t-attf-class="#{'active' if b_page.get('id') &lt; active_session_id else ''}"
+                        t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});"
+                        t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
                 </ul>
            </div>
 
+        </template>
+
+        <template id="jft_survey_navigation" name="JFT Survey Navigation">
+            <div class="row align-items-center" style="height: 100%">
+                <div class="col-12 py-2 align-middle text-end">
+                    <button t-att-data-previous-page-id="previous_page_id"
+                            t-if="survey and survey.users_can_go_back"
+                            t-att-disabled="not can_go_back"
+                            type="submit"
+                            value="previous"
+                            class="btn btn-primary jft_survey_navigation_submit jft-button-previous" style="margin-right: 5px">
+                        <i class="oi oi-chevron-left px-1"/> Back</button>
+                    <button
+                            type="submit"
+                            t-attf-value="#{'start' if answer.state == 'new' else 'next'}"
+                            class="btn btn-primary jft-button-next jft_survey_navigation_submit"
+                            style="margin-right: 5px">Next <i class="oi oi-chevron-right px-1"/></button>
+                    <button class="btn btn-primary jft-button-finish-session">Finish Section</button>
+                </div>
+            </div>
         </template>
 
        <template id="jft_survey_page_fill" inherit_id="survey.survey_page_fill">
@@ -52,11 +76,10 @@
                            <t t-call="survey.survey_fill_form" />
                        </div>
                    </section>
-                   <section id="jft_survey_footer">
-                        <p class="mb-0">Footer</p>
-                   </section>
                </div>
-
+               <footer class="jft_survey_footer">
+                    <div class="container-fluid jft_survey_navigation" style="height: 100%" t-call="jft_mock_test.jft_survey_navigation"/>
+               </footer>
            </xpath>
        </template>
         <template id="jft_survey_fill_form_start" inherit_id="survey.survey_fill_form_start">
@@ -145,23 +168,42 @@
                 </div>
             </xpath>
         </template>
+        <template id="jft_survey_left_header">
+            <div class="inner">
+                <t t-if="answer.state == 'in_progress'" t-call="jft_mock_test.jft_survey_header_finish_section"/>
+                <t t-if="answer.state == 'new'" t-call="jft_mock_test.jft_survey_header_date"/>
+            </div>
+        </template>
+        <template id="jft_survey_header_finish_section" name="JFT Survey header finish section">
+            <div class="jft_survey_header_finish_section text-end">
+                <button class="btn btn-primary" type="submit" value="finish_section">Finish Section</button>
+            </div>
+        </template>
+        <template id="jft_survey_header_date" name="JFT Survey header date">
+            <div class="jft_survey_date text-end">
+                <p class="mb-0">Date: <span t-esc="datetime.datetime.now().strftime('%d-%b-%Y')"/>  </p>
+            </div>
+        </template>
+        <template id="jft_survey_header_right">
+            <div class="inner">
+                <h5 class="question_number">Question: 0</h5>
+                <h5 class="section_title mb-0">Section: <span t-esc="jft_section_title"/></h5>
+            </div>
+        </template>
         <template id="jft_survey_fill_header" inherit_id="survey.survey_fill_header">
             <xpath expr="//div[hasclass('o_survey_nav')]" position="replace">
                 <div class="o_survey_nav">
                     <div class="container-fluid m-0 p-0">
                         <div class="row align-items-center py-3">
                             <div  class="col-4 px-3">
-                                <h1 t-if="answer.state == 'new' or survey.questions_layout != 'page_per_question'"
-                                    t-esc="survey.title" class="o_survey_main_title mb-0"/>
+                                <div class="jft_survey_header_question_section" t-call="jft_mock_test.jft_survey_header_right"/>
                             </div>
-                            <div class="o_survey_timer col-4">
-                                <p class="mb-0 text-end" t-if="answer.state == 'new'">Section Time Remaining</p>
-                                <h1 class="o_survey_timer_container timer text-end"/>
+                            <div class="o_survey_timer col-4 text-center">
+                                <h5 class="mb-0 text-center" t-if="answer.state == 'new'"> <i class="fa fa-clock-o fa-lg px-1"/> Section Time Remaining</h5>
+                                <h1 class="o_survey_timer_container timer text-center"/>
                             </div>
                             <div class="col-4">
-                                <div class="survey_main text-end">
-                                    <p class="mb-0">Date: <span t-esc="datetime.datetime.now().strftime('%d-%b-%Y')"/>  </p>
-                                </div>
+                                <div class="jft_survey_left_header" t-call="jft_mock_test.jft_survey_left_header"/>
                             </div>
                         </div>
                     </div>

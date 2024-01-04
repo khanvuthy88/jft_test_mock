@@ -32,9 +32,14 @@ class JFTSurvey(Survey):
 
         jft_section_title = request.env['ir.qweb']._render('jft_mock_test.jft_survey_section_title', survey_data)
         jft_section_aside = request.env['ir.qweb']._render('jft_mock_test.jft_survey_aside', survey_data)
-
+        jft_survey_navigation = request.env['ir.qweb']._render('jft_mock_test.jft_survey_navigation', survey_data)
+        jft_survey_header_left = request.env['ir.qweb']._render('jft_mock_test.jft_survey_left_header', survey_data)
+        jft_survey_header_right = request.env['ir.qweb']._render('jft_mock_test.jft_survey_header_right', survey_data)
         res['jft_section_title'] = jft_section_title
         res['jft_section_aside'] = jft_section_aside
+        res['jft_survey_navigation'] = jft_survey_navigation
+        res['jft_survey_header_left'] = jft_survey_header_left
+        res['jft_survey_header_right'] = jft_survey_header_right
 
         return res
 
@@ -57,6 +62,7 @@ class JFTSurvey(Survey):
                   details about sections and questions.
         """
         res = super()._prepare_survey_data(survey_sudo, answer_sudo, **post)
+
         jft_section_question = {}
         section_title = ''
         actived_section = []
@@ -68,11 +74,11 @@ class JFTSurvey(Survey):
         if 'active_session_id' not in res:
             res['active_session_id'] = '0'
 
-
         if 'question' in res:
             section_title = res['question'].title
             if res['question'].is_page and int(res['active_session_id']) < res['question'].id:
-                request.future_response.set_cookie('active_session_id', str(res['question'].id), max_age=SESSION_LIFETIME)
+                request.future_response.set_cookie('active_session_id', str(res['question'].id),
+                                                   max_age=SESSION_LIFETIME)
         for section in survey_sudo.page_ids:
             jft_section_name = section.title
 
@@ -93,6 +99,9 @@ class JFTSurvey(Survey):
 
                 if is_active_question:
                     section_title = section.title
+        intro_dict = {'id': 0, 'title': 'Introduction'}
+        if 'breadcrumb_pages' in res:
+            res['breadcrumb_pages'].insert(0, intro_dict)
         res['active_session_id'] = int(request.httprequest.cookies.get('active_session_id', 0))
         res['jft_section'] = jft_section_question
         res['jft_section_title'] = section_title
@@ -108,10 +117,15 @@ class JFTSurvey(Survey):
         res = super().survey_display_page(survey_token, answer_token, **post)
         return res
 
-
     @http.route()
     def survey_begin(self, survey_token, answer_token, **post):
         return super().survey_begin(survey_token, answer_token, **post)
+
+    @http.route()
+    def survey_next_question(self, survey_token, answer_token, **post):
+        res = super().survey_next_question(survey_token, answer_token, **post)
+        print(res)
+        return res
 
     @http.route()
     def survey_submit(self, survey_token, answer_token, **post):

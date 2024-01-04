@@ -29,6 +29,7 @@ Long description of module's purpose
 
     # always loaded
     'data': [
+        'views/survey_question_views.xml',
         'views/survey_survey_templates.xml',
     ],
 }
