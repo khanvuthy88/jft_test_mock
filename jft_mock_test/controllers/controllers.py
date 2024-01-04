@@ -3,6 +3,8 @@ from odoo import http
 from odoo.addons.survey.controllers.main import Survey
 from odoo.http import request, content_disposition
 
+SESSION_LIFETIME = 60 * 60 * 2
+
 
 class JFTSurvey(Survey):
 
@@ -59,13 +61,18 @@ class JFTSurvey(Survey):
         section_title = ''
         actived_section = []
 
+        request_cookies = request.httprequest.cookies.get('active_session_id', '0')
+        if not request_cookies:
+            request.future_response.set_cookie('active_session_id', '0', max_age=SESSION_LIFETIME)
+
         if 'active_session_id' not in res:
-            res['active_session_id'] = 0
+            res['active_session_id'] = '0'
+
 
         if 'question' in res:
             section_title = res['question'].title
-            if res['question'].is_page:
-                res['active_session_id'] = res['question'].id
+            if res['question'].is_page and int(res['active_session_id']) < res['question'].id:
+                request.future_response.set_cookie('active_session_id', str(res['question'].id), max_age=SESSION_LIFETIME)
         for section in survey_sudo.page_ids:
             jft_section_name = section.title
 
@@ -86,12 +93,21 @@ class JFTSurvey(Survey):
 
                 if is_active_question:
                     section_title = section.title
-
+        res['active_session_id'] = int(request.httprequest.cookies.get('active_session_id', 0))
         res['jft_section'] = jft_section_question
         res['jft_section_title'] = section_title
         res['active_section'] = actived_section
-
         return res
+
+    @http.route()
+    def survey_display_page(self, survey_token, answer_token, **post):
+        access_data = self._get_access_data(survey_token, answer_token, ensure_token=True)
+        answer_sudo = access_data['answer_sudo']
+        if answer_sudo.state == 'new':
+            request.future_response.set_cookie('active_session_id', '0', max_age=SESSION_LIFETIME)
+        res = super().survey_display_page(survey_token, answer_token, **post)
+        return res
+
 
     @http.route()
     def survey_begin(self, survey_token, answer_token, **post):
