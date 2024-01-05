@@ -33,7 +33,7 @@
             <div class="jft_survey_aside">
                 <ul class="jft_section_list">
                     <li t-att-data-section-id="active_session_id"
-                        t-attf-class="#{'active' if b_page.get('id') &lt; active_session_id else ''}"
+                        t-attf-class="#{'active' if question and b_page.get('id') &lt; question.page_id.id else ''}"
                         t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});"
                         t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
                 </ul>

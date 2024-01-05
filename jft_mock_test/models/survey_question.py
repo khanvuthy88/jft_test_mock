@@ -7,3 +7,5 @@ class SurveyQuestion(models.Model):
     _inherit = "survey.question"
 
     skip_question = fields.Boolean()
+
+
