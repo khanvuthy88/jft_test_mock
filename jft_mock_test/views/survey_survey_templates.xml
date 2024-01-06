@@ -1,19 +1,55 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
+        <template id="jft_question_container" inherit_id="survey.question_container">
+            <xpath expr="//div[hasclass('mb-4')]" position="replace">
+                <t t-if="question.is_page">
+                    <p class="p-5" style="background-color: #dae3f3">Would you like to move to next section?</p>
+                </t>
+                <t t-else="">
+                    <h3 t-if="not hide_question_title">
+                        <span t-field='question.title' class="text-break" />
+                        <span t-if="question.constr_mandatory" class="text-danger">*</span>
+                    </h3>
+                    <div t-if="not is_html_empty(question.description)" t-field='question.description' class="text-muted lorem oe_no_empty mt-1 text-break"/>
+                </t>
+            </xpath>
+        </template>
         <template id="jft_survey_fill_form_in_progress" inherit_id="survey.survey_fill_form_in_progress">
-            <xpath expr="//t[@t-else='']/div[hasclass('row')]" position="before">
-                <div class="row">
+            <xpath expr="//t[@t-else='']/div[hasclass('row')]" position="replace">
+                <div class="row" t-if="not question.is_page">
                     <div class="col-12 text-center">
                         <nav aria-label="Question Pagination">
                             <ul class="pagination justify-content-center">
-                                <li t-foreach="jft_section.get(jft_section_title)" t-as="jft"
-                                    t-attf-class="page-item #{'active' if jft.get('id') == question.id else ''}"
+                                <li t-foreach="question.page_id.question_ids" t-as="jft"
+                                    t-attf-class="page-item #{'active' if jft.id == question.id else ''}"
                                     aria-current="page">
                                     <span class="page-link" t-esc="jft_index + 1"/>
                                 </li>
                             </ul>
                         </nav>
+                    </div>
+                </div>
+                <div class="row">
+                    <div t-if="question.is_page" class="col-12">
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-primary rounded-0 text-start text-white"><i class="oi oi-chevron-left px-1"/> Back to previous section</button>
+                            <button type="submit"
+                                    value="next"
+                                    class="btn btn-primary rounded-0 text-end text-white btn_got_to_next_section">Go to next section <i class="oi oi-chevron-right px-1"/></button>
+                        </div>
+                    </div>
+                    <div t-else="" class="col-12 text-center mt16 d-none">
+                        <t t-set="submit_value" t-value="'finish' if survey_last or answer.is_session_answer else 'next_skipped' if answer.survey_first_submitted and skipped_questions and question in skipped_questions else 'next'"/>
+                        <button id="next_page" t-attf-class="btn #{'btn-secondary' if survey_last else 'btn-primary'} d-none">Next</button>
+                        <button type="submit" t-att-value="submit_value" t-attf-class="btn #{'btn-secondary' if survey_last else 'btn-primary'} disabled">
+                            <t t-if="submit_value == 'finish'">Submit</t>
+                            <t t-elif="submit_value == 'next_skipped'">Next Skipped</t>
+                            <t t-else="">Continue</t>
+                        </button>
+                        <span class="fw-bold text-muted ms-2 d-none d-md-inline">
+                            <span id="enter-tooltip">or press Enter</span>
+                        </span>
                     </div>
                 </div>
             </xpath>
@@ -33,6 +69,8 @@
             <div class="jft_survey_aside">
                 <ul class="jft_section_list">
                     <li t-att-data-section-id="active_session_id"
+                        t-att-data-page-id="question and question.page_id.id or 0"
+                        t-att-data-breadcrumb-id="b_page.get('id')"
                         t-attf-class="#{'active' if question and b_page.get('id') &lt; question.page_id.id else ''}"
                         t-attf-style="height: calc(100% / #{len(breadcrumb_pages)});"
                         t-foreach="breadcrumb_pages" t-as="b_page"><span t-esc="b_page['title']"/></li>
@@ -42,23 +80,32 @@
         </template>
 
         <template id="jft_survey_navigation" name="JFT Survey Navigation">
-            <div class="row align-items-center" style="height: 100%">
-                <div class="col-12 py-2 align-middle text-end">
-                    <button t-att-data-previous-page-id="previous_page_id"
-                            t-if="survey and survey.users_can_go_back"
-                            t-att-disabled="not can_go_back"
-                            type="submit"
-                            value="previous"
-                            class="btn btn-primary jft_survey_navigation_submit jft-button-previous" style="margin-right: 5px">
-                        <i class="oi oi-chevron-left px-1"/> Back</button>
-                    <button
-                            type="submit"
-                            t-attf-value="#{'start' if answer.state == 'new' else 'next'}"
-                            class="btn btn-primary jft-button-next jft_survey_navigation_submit"
-                            style="margin-right: 5px">Next <i class="oi oi-chevron-right px-1"/></button>
-                    <button class="btn btn-primary jft-button-finish-session">Finish Section</button>
+            <div class="container-fluid jft_survey_navigation" t-if="question and not question.is_page">
+                <div class="row align-items-center" style="height: 100%" t-if="not question or not question.is_page">
+                    <div class="col-12 py-2 align-middle text-end">
+                        <button t-att-data-previous-page-id="previous_page_id"
+                                t-if="survey and survey.users_can_go_back"
+                                t-att-disabled="not can_go_back"
+                                type="submit"
+                                value="previous"
+                                class="btn btn-primary jft_survey_navigation_submit jft-button-previous" style="margin-right: 5px">
+                            <i class="oi oi-chevron-left px-1"/> Back</button>
+                        <t t-set="can_go_forward"
+                           t-value="survey and survey.questions_layout in ['page_per_question', 'page_per_section'] and answer and answer.state != 'done' and not answer.is_session_answer"/>
+                        <button
+                                type="submit"
+                                t-att-disabled="not can_go_forward"
+                                t-attf-value="#{'start' if answer.state == 'new' else 'next'}"
+                                class="btn btn-primary jft-button-next jft_survey_navigation_submit"
+                                style="margin-right: 5px">Next <i class="oi oi-chevron-right px-1"/></button>
+                        <button class="btn btn-primary jft-button-finish-session">Finish Section</button>
+                    </div>
                 </div>
             </div>
+        </template>
+
+        <template id="jft_survey_footer">
+
         </template>
 
        <template id="jft_survey_page_fill" inherit_id="survey.survey_page_fill">
@@ -77,9 +124,7 @@
                        </div>
                    </section>
                </div>
-               <footer class="jft_survey_footer">
-                    <div class="container-fluid jft_survey_navigation" style="height: 100%" t-call="jft_mock_test.jft_survey_navigation"/>
-               </footer>
+               <footer class="jft_survey_footer" t-call="jft_mock_test.jft_survey_navigation"/>
            </xpath>
        </template>
         <template id="jft_survey_fill_form_start" inherit_id="survey.survey_fill_form_start">
@@ -186,7 +231,7 @@
         </template>
         <template id="jft_survey_header_right">
             <div class="inner">
-                <h5 class="question_number">Question: 0</h5>
+                <h5 t-if="question and not question.is_page" class="question_number">Question: <span t-esc="question_index"/></h5>
                 <h5 class="section_title mb-0">Section: <span t-esc="jft_section_title"/></h5>
             </div>
         </template>
@@ -212,6 +257,11 @@
                         t-att-data-can-go-back="survey.users_can_go_back"
                         t-att-data-pages="json.dumps(breadcrumb_pages)" />
                 </div>
+            </xpath>
+        </template>
+        <template id="jft_layout" inherit_id="survey.layout">
+            <xpath expr='//*[@id="wrapwrap"]/div[2]' position="attributes">
+                <attribute name="class">d-none</attribute>
             </xpath>
         </template>
     </data>

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+from itertools import takewhile
 from odoo import http
 from odoo.addons.survey.controllers.main import Survey
 from odoo.http import request, content_disposition
@@ -44,48 +46,58 @@ class JFTSurvey(Survey):
 
         return res
 
-    def _prepare_survey_data(self, survey_sudo, answer_sudo, **post):
-        """
-        Prepare survey data for rendering.
-
-        This method enhances the prepared survey data by including information
-        about active sections and their questions. It utilizes the provided
-        survey_sudo, answer_sudo, and additional post parameters to create
-        a structured response.
-
-        Args:
-            survey_sudo (recordset): Survey record.
-            answer_sudo (recordset): Survey answer record.
-            **post: Additional parameters from the HTTP request.
-
-        Returns:
-            dict: A dictionary containing the prepared survey data with added
-                  details about sections and questions.
-        """
-        res = super()._prepare_survey_data(survey_sudo, answer_sudo, **post)
-        jft_section_question = {}
-        section_title = ''
-
+    def _set_default_active_session_cookie(self):
         request_cookies = request.httprequest.cookies.get('active_session_id', '0')
         if not request_cookies:
             request.future_response.set_cookie('active_session_id', '0', max_age=SESSION_LIFETIME)
 
-        if 'active_session_id' not in res:
-            res['active_session_id'] = '0'
+    def _update_active_session_cookie(self, question_id):
+        request.future_response.set_cookie('active_session_id', str(question_id), max_age=SESSION_LIFETIME)
 
-        if 'question' in res:
-            section_title = res['question'].page_id.title
-            request.future_response.set_cookie(
-                'active_session_id',
-                str(res['question'].page_id.id),
-                max_age=SESSION_LIFETIME
-            )
-        intro_dict = {'id': 0, 'title': 'Introduction'}
+    def _update_survey_data(self, res, intro_dict):
         if 'breadcrumb_pages' in res:
             res['breadcrumb_pages'].insert(0, intro_dict)
 
+    def _prepare_intro_dict(self):
+        return {'id': 0, 'title': 'Introduction'}
+
+    def _question_index_by_page(self, question_id, page_question_ids):
+        reset_index = 1
+        for question in page_question_ids:
+            if question.is_page:
+                reset_index = 0
+            if question.id == question_id:
+                return reset_index
+            if not question.is_page:
+                reset_index += 1
+        return 0
+
+    def _prepare_survey_data(self, survey_sudo, answer_sudo, **post):
+        res = super()._prepare_survey_data(survey_sudo, answer_sudo, **post)
+        jft_section_question = {}
+        section_title = ''
+
+        self._set_default_active_session_cookie()
+
+        if 'active_session_id' not in res:
+            res['active_session_id'] = '0'
+        if 'question' in res:
+            if res['question'].is_page:
+                section_title = res['question'].title
+            else:
+                section_title = res['question'].page_id.title
+            self._update_active_session_cookie(res['question'].page_id.id)
+
+            res['question_index'] = self._question_index_by_page(res['question'].id,
+                                                                 res['question'].page_id.question_ids)
+        else:
+            res['question_index'] = 0
+
+        intro_dict = self._prepare_intro_dict()
+        self._update_survey_data(res, intro_dict)
         active_session = request.httprequest.cookies.get('active_session_id')
-        res['active_session_id'] = 0 if active_session == 'False' else int(active_session)
+        res['active_session_id'] = int(active_session) if active_session and active_session != 'False' else 0
+
         res['jft_section'] = jft_section_question
         res['jft_section_title'] = section_title
         return res

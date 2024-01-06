@@ -8,18 +8,17 @@ SurveyFormWidget.include({
 
         var self = this;
         return this._super.apply(this, arguments).then(function () {
-            self.$jftSurveyNavigation = $('.jft_survey_navigation');
+            self.$jftSurveyNavigation = $('.jft_survey_footer');
             self.$jftSurveyHeaderLeft = $('.jft_survey_left_header');
             self.$jftSurveyHeaderRight = $('.jft_survey_header_question_section');
         });
     },
     _onNextScreenDone(options) {
         var self = this;
+        
         this._super(...arguments);
         var result = this.nextScreenResult;
         const active_breadcrumb = browser.localStorage.getItem('active_breadcrumb');
-
-        console.log(this.options);
         
         if(active_breadcrumb == 0 && result.active_session_id){
             browser.localStorage.setItem('active_breadcrumb', result.active_session_id);
@@ -36,7 +35,7 @@ SurveyFormWidget.include({
             $('section#jft_sub_title').html(result.jft_section_title);
         }
         if(result.jft_survey_navigation && this.$jftSurveyNavigation.length !== 0){
-            $('.jft_survey_navigation').html(result.jft_survey_navigation);
+            $('.jft_survey_footer').html(result.jft_survey_navigation);
             this.$jftSurveyNavigation.find('.jft_survey_navigation_submit').on('click', self._onSubmit.bind(self));
         }
         if(result.jft_survey_header_left && this.$jftSurveyHeaderLeft.length !== 0){

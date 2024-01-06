@@ -3,6 +3,10 @@ $secondary-color: #669900;
 $intro_label: #ffe9a3;
 $intro_input: #efefef;
 
+.btn_got_to_next_section{
+    background-color: #2f5597 !important;
+    border-color: #2f5597 !important;
+}
 .btn-primary{
     background-color: $intro_label;
     border-color: $intro_label;
@@ -16,10 +20,12 @@ $intro_input: #efefef;
 
 footer{
     &.jft_survey_footer{
-        height: 60px;
-        background-color: $primary-color;
-        color: #fff;
-        border-top: 5px solid $secondary-color;
+        .jft_survey_navigation{
+            height: 60px;
+            background-color: $primary-color;
+            color: #fff;
+            border-top: 5px solid $secondary-color;
+        }
         button{
             &.jft-button-next, &.jft-button-previous{
                 background-color: $secondary-color;
@@ -96,7 +102,7 @@ footer{
                                 top: 25px;
                                 border: 1px solid $secondary-color;
                                 border-radius: 4px;
-                                height: 80%;
+                                height: calc(100% - 30px);
                                 width: 10px;
                                 background-color: $secondary-color;
                                 box-shadow: rgba(102, 153, 0, 0.15) 0px 48px 100px 0px;
@@ -117,7 +123,7 @@ footer{
                             top: 25px;
                             border: 1px solid #000;
                             border-radius: 4px;
-                            height: 80%;
+                            height: calc(100% - 30px);
                             width: 10px;
                             box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
                         }
@@ -137,12 +143,18 @@ footer{
                     padding: 1rem;
                     border-radius: 0;
                     background-color: $intro_input;
+                    @include media-breakpoint-up(md){
+                        width: 250px;
+                    }
                 }
             }
             label{
                 background-color: $intro_label;
                 padding: .5rem 1rem;
                 text-align: center;
+                @include media-breakpoint-up(md){
+                    width: 120px;
+                }
             }
         }
     }
